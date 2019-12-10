@@ -1,0 +1,47 @@
+# kubectl create clusterrolebinding default-view --clusterrole=view --serviceaccount=apps:default
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: replicacount
+  namespace: apigee
+  labels:
+    app: replicacount
+spec:
+  ports:
+  - port: 8080
+    name: http
+  selector:
+    app: replicacount
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: replicacount
+  namespace: apigee
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: replicacount
+        version: v1
+    spec:
+      serviceAccountName: default
+      automountServiceAccountToken: true
+      containers:
+      - image: gcr.io/{project-id}/replicacount:latest
+        imagePullPolicy: Always
+        name: replicacount
+        ports:
+        - containerPort: 8080
+        resources:
+          requests:
+            cpu: 100m
+        env:
+          - name: APIGEE_NAMESPACE
+            value: apigee
+          - name: DEBUG
+            value: "true"            
+      imagePullSecrets:
+        - name: gcrsecret
