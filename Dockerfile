@@ -1,4 +1,5 @@
 FROM golang:latest as builder
+RUN useradd -U app
 ADD . /go/src/replicacount 
 WORKDIR /go/src/replicacount
 COPY main.go .
@@ -16,5 +17,7 @@ RUN apk --update add ca-certificates
 FROM scratch
 WORKDIR /
 COPY --from=builder /go/bin/replicacount .
+COPY --from=builder /etc/passwd /etc/passwd
 COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+USER app
 CMD ["./replicacount"]
