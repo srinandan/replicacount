@@ -8,7 +8,7 @@ COPY go.sum .
 ENV GO111MODULE=on
 RUN go mod download
 COPY . .
-RUN CGO_ENABLED=0 GOOS=linux go build -o /go/bin/replicacount
+RUN CGO_ENABLED=0 GOOS=linux go build -a -ldflags '-w -extldflags "-static"' -o /go/bin/replicacount
 
 #without these certificates, we cannot verify the JWT token
 FROM alpine:latest as certs
